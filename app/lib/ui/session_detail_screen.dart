@@ -38,12 +38,12 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
 
   String get _sid => widget.session.id;
 
-  // Transcript cache/store key: the ClaudeSessionID, which changes on /clear (new
+  // Transcript cache/store key: the agent session id, which changes on /clear (new
   // transcript file), so pre-clear chunks aren't reused against the post-clear file.
   // Falls back to the argus id before a hook has set one.
   String _keyFor(String? cid) =>
       (cid != null && cid.isNotEmpty) ? cid : _sid;
-  String _cacheKey(Session? s) => _keyFor(s?.claudeSessionId);
+  String _cacheKey(Session? s) => _keyFor(s?.agentSessionId);
 
   @override
   void initState() {
@@ -123,12 +123,12 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen>
       }
     });
     // Re-open when the transcript's cache key changes: a /clear swaps the session's
-    // ClaudeSessionID (new transcript file) in place, and the first hook sets it from
+    // agent session id (new transcript file) in place, and the first hook sets it from
     // null. Re-bind onto the new (empty) store and drop the superseded one so no
     // pre-clear chunks survive or leak. Guarding on the *derived* key (not the raw id)
     // treats the null→id first-set as a no-op key-wise unless it actually differs.
     ref.listen<String?>(
-      sessionsProvider.select((m) => m[_sid]?.claudeSessionId),
+      sessionsProvider.select((m) => m[_sid]?.agentSessionId),
       (prev, next) {
         final prevKey = _keyFor(prev);
         final nextKey = _keyFor(next);
