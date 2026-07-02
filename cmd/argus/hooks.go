@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -48,6 +49,12 @@ func newHooksInstallCmd() *cobra.Command {
 				if err != nil {
 					return fail(cmd, err)
 				}
+				// Only install for agents the user actually has set up: a missing config
+				// dir means the agent was never run, so don't materialize one for it.
+				if dir := filepath.Dir(path); !dirExists(dir) {
+					fmt.Printf("skipped %s: %s does not exist (agent not set up)\n", a.Agent(), dir)
+					continue
+				}
 				if err := a.Install(argusBin); err != nil {
 					return fail(cmd, err)
 				}
@@ -83,6 +90,12 @@ func newHooksUninstallCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+// dirExists reports whether path exists and is a directory.
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
 
 // detectArgusBin returns the path hooks invoke as `<bin> hook <event>`: this
