@@ -89,7 +89,9 @@ func (m model) chunkExpandable(c transcript.Chunk) bool {
 	case transcript.ChunkAI:
 		return len(c.Items) > 0
 	case transcript.ChunkUser:
-		return strings.Count(c.Text, "\n") >= maxCollapsedLines
+		// Count wrapped display lines, not source lines: a few very long lines
+		// still overflow once wrapped into the bubble.
+		return len(strings.Split(m.renderMD(c.Text, m.userBubbleInner()), "\n")) > maxCollapsedLines
 	case transcript.ChunkSystem:
 		return c.Detail != ""
 	case transcript.ChunkShell:
@@ -402,12 +404,18 @@ func toolPreview(it transcript.Item) string {
 	return out
 }
 
+// userBubbleWidth is the outer width of a user chunk's bubble.
+func (m model) userBubbleWidth() int {
+	return max(m.containerWidth()*3/4, 20)
+}
+
+func (m model) userBubbleInner() int {
+	return max(m.userBubbleWidth()-6, 20)
+}
+
 func (m model) renderUserCard(c transcript.Chunk, selected, accent bool) string {
 	container := m.containerWidth()
-	maxBubble := container * 3 / 4
-	if maxBubble < 20 {
-		maxBubble = 20
-	}
+	maxBubble := m.userBubbleWidth()
 	sel := selIndicator(selected)
 	expandable := m.chunkExpandable(c)
 	expanded := m.chunkExpanded(c)
@@ -424,17 +432,12 @@ func (m model) renderUserCard(c transcript.Chunk, selected, accent bool) string 
 	}
 	header := sel + strings.Repeat(" ", gap) + right
 
-	content := c.Text
-	var hint string
+	body := m.renderMD(c.Text, m.userBubbleInner())
 	if !expanded {
-		if t, hidden := truncateLines(content, maxCollapsedLines); hidden > 0 {
-			content, hint = t, hiddenHint(hidden)
+		// Truncate wrapped display lines so long single lines collapse too.
+		if t, hidden := truncateLines(body, maxCollapsedLines); hidden > 0 {
+			body = t + "\n" + hiddenHint(hidden)
 		}
-	}
-	inner := max(maxBubble-6, 20)
-	body := m.renderMD(content, inner)
-	if hint != "" {
-		body += "\n" + hint
 	}
 
 	borderColor := ColorTextMuted
