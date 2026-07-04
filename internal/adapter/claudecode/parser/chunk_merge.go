@@ -27,6 +27,22 @@ func extractExpandedPrompt(msg ClassifiedMsg) string {
 	return ai.Text
 }
 
+// skillBaseDirPrefix marks the first line of a skill's expanded prompt.
+const skillBaseDirPrefix = "Base directory for this skill: "
+
+// skillLoad recognizes a skill-loading slash command from its expanded prompt.
+func skillLoad(cmd, expanded string) (name, path, body string, ok bool) {
+	if !strings.HasPrefix(expanded, skillBaseDirPrefix) {
+		return "", "", "", false
+	}
+	line, rest, _ := strings.Cut(expanded, "\n")
+	// cmd is "/name args"; the skill's identity is just the name — drop any argument.
+	name, _, _ = strings.Cut(strings.TrimPrefix(cmd, "/"), " ")
+	path = strings.TrimSpace(strings.TrimPrefix(line, skillBaseDirPrefix))
+	body = strings.TrimSpace(rest)
+	return name, path, body, true
+}
+
 // pendingTool tracks a tool_use DisplayItem awaiting its result.
 type pendingTool struct {
 	index     int       // index into the items slice

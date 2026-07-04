@@ -78,6 +78,23 @@ type SystemMsg struct {
 
 func (SystemMsg) classifiedMsg() {}
 
+// ShellMsg is a !cmd the user ran directly in the CLI.
+type ShellMsg struct {
+	Timestamp time.Time
+	Command   string
+}
+
+func (ShellMsg) classifiedMsg() {}
+
+// ShellOutputMsg is the stdout/stderr of a preceding ShellMsg.
+type ShellOutputMsg struct {
+	Timestamp time.Time
+	Output    string
+	IsError   bool // stderr was non-empty
+}
+
+func (ShellOutputMsg) classifiedMsg() {}
+
 // TeammateMsg represents a message from a teammate agent.
 // Folded into the AI turn during chunk building rather than starting a new user chunk.
 type TeammateMsg struct {
