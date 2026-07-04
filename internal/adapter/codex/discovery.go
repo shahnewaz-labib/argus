@@ -239,7 +239,7 @@ func summaryFor(m threadMeta, modelNames map[string]string) *session.Summary {
 	if model == "" && m.title == "" && m.tokens == 0 {
 		return nil
 	}
-	return &session.Summary{Model: model, Tokens: m.tokens, Task: m.title}
+	return &session.Summary{ModelName: model, ModelColor: modelColorFor(model), Tokens: m.tokens, Task: m.title}
 }
 
 // findRolloutPath locates a thread's transcript by glob.
