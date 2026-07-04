@@ -36,7 +36,7 @@ func (d *Node) handleHook(ctx context.Context, params json.RawMessage) (any, err
 		go d.scan(context.Background())
 	}
 
-	if alive && event == "PermissionRequest" {
+	if alive && a.ShouldBlock(ev) {
 		return api.HookResult{Output: d.awaitDecision(ctx, a, s.ID, ev)}, nil
 	}
 	return api.HookResult{}, nil
@@ -51,7 +51,7 @@ func (d *Node) handleSessionRespond(_ context.Context, params json.RawMessage) (
 		return nil, err
 	}
 	if pd := d.takePending(p.SessionID); pd != nil {
-		pd.ch <- buildDecision(pd, p)
+		pd.ch <- pd.format(p)
 	}
 	return nil, nil
 }
