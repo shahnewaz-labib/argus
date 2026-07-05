@@ -40,6 +40,7 @@ const (
 	ItemText     ItemKind = "text" // assistant output text
 	ItemTool     ItemKind = "tool"
 	ItemSubagent ItemKind = "subagent" // a subagent op: spawn (drillable), or wait/close on one
+	ItemSkill    ItemKind = "skill"    // a skill file loaded into context via the Skill tool
 	ItemPrompt   ItemKind = "prompt"   // synthetic: injected TUI-side, never parser-emitted
 )
 
@@ -131,7 +132,7 @@ func (c Chunk) LastOutput() (Item, bool) {
 		}
 	}
 	for i := len(c.Items) - 1; i >= 0; i-- {
-		if c.Items[i].Kind == ItemTool || c.Items[i].Kind == ItemSubagent {
+		if c.Items[i].Kind == ItemTool || c.Items[i].Kind == ItemSubagent || c.Items[i].Kind == ItemSkill {
 			return c.Items[i], true
 		}
 	}
