@@ -69,6 +69,11 @@ func newHookCmd() *cobra.Command {
 				shell.Exit(0)
 			}
 
+			// A non-blocking hook still answers with the agent's pass-through stdout
+			// (some agents require a valid JSON object per event). Computed locally so
+			// the agent gets a valid answer even if the daemon call below times out.
+			out := a.HookOutput(ev)
+
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
@@ -83,6 +88,9 @@ func newHookCmd() *cobra.Command {
 			select {
 			case <-done:
 			case <-time.After(2 * time.Second):
+			}
+			if out != "" {
+				fmt.Println(out)
 			}
 			shell.Exit(0)
 		},

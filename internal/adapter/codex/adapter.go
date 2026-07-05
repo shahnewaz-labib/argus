@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"github.com/MunifTanjim/argus/internal/adapter"
-	"github.com/MunifTanjim/argus/internal/adapter/claudecode"
+	"github.com/MunifTanjim/argus/internal/adapter/hookdecision"
 	"github.com/MunifTanjim/argus/internal/api"
 	"github.com/MunifTanjim/argus/internal/registry"
 	"github.com/MunifTanjim/argus/internal/session"
@@ -35,6 +35,9 @@ func (cxAdapter) ProcessHook(reg *registry.Registry, ev adapter.HookEvent) (sess
 
 func (cxAdapter) EventName(ev adapter.HookEvent) string { return EventName(ev) }
 
+// RescanOnHook rescans at Codex's session start (Codex has no session-end event).
+func (cxAdapter) RescanOnHook(ev adapter.HookEvent) bool { return EventName(ev) == "SessionStart" }
+
 func (cxAdapter) ShouldBlock(ev adapter.HookEvent) bool { return ShouldBlock(ev) }
 
 func (cxAdapter) PermissionPayload(ev adapter.HookEvent) (string, json.RawMessage) {
@@ -42,8 +45,10 @@ func (cxAdapter) PermissionPayload(ev adapter.HookEvent) (string, json.RawMessag
 }
 
 func (cxAdapter) FormatDecision(toolName string, toolInput json.RawMessage, p api.RespondParams) string {
-	return claudecode.FormatDecision(toolName, toolInput, p)
+	return hookdecision.FormatDecision(toolName, toolInput, p)
 }
+
+func (cxAdapter) HookOutput(adapter.HookEvent) string { return "" }
 
 // --- Transcript ---
 

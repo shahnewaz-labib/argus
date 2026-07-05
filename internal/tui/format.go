@@ -142,17 +142,19 @@ func clockTime(ts string) string {
 	return ts
 }
 
-// toolColor returns the category color for a Claude Code tool by name, paralleling
-// toolIcon. Unknown tools get the dim "other" color.
+// toolColor returns the category color for a tool by name.
 func toolColor(name string) color.Color {
+	if meta, ok := toolRegistry[name]; ok {
+		return categoryColor(meta.category)
+	}
 	switch name {
-	case "Read", "NotebookRead":
+	case "Read", "NotebookRead", "view_image":
 		return ColorToolRead
-	case "Edit", "MultiEdit", "NotebookEdit":
+	case "Edit", "MultiEdit", "NotebookEdit", "apply_patch":
 		return ColorToolEdit
 	case "Write":
 		return ColorToolWrite
-	case "Bash", "BashOutput", "KillShell":
+	case "Bash", "BashOutput", "KillShell", "exec_command":
 		return ColorToolBash
 	case "Grep":
 		return ColorToolGrep
@@ -162,7 +164,7 @@ func toolColor(name string) color.Color {
 		return ColorToolTask
 	case "Skill":
 		return ColorToolSkill
-	case "WebFetch", "WebSearch":
+	case "WebFetch", "WebSearch", "web_search":
 		return ColorToolWeb
 	default:
 		return ColorToolOther

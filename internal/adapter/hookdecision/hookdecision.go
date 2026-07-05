@@ -1,4 +1,6 @@
-package claudecode
+// Package hookdecision renders a user's permission answer into hookSpecificOutput
+// decision JSON.
+package hookdecision
 
 import (
 	"encoding/json"
@@ -21,8 +23,7 @@ type hookOut struct {
 	} `json:"hookSpecificOutput"`
 }
 
-// formatAnswer renders an answer value for the clarify message. Lists join with
-// ", " ([]string from the TUI, []any from a client's JSON).
+// formatAnswer renders an answer value for the clarify message.
 func formatAnswer(v any) string {
 	switch x := v.(type) {
 	case string:
@@ -40,8 +41,7 @@ func formatAnswer(v any) string {
 	}
 }
 
-// buildClarifyMessage renders the "Chat about this" feedback. Mirrors Claude
-// Code's onReject(feedback) text.
+// buildClarifyMessage renders the "Chat about this" feedback.
 func buildClarifyMessage(toolInput json.RawMessage, answers map[string]any) string {
 	var in struct {
 		Questions []struct {

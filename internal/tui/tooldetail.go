@@ -49,6 +49,12 @@ func (m model) fetchToolBodyCmd(it transcript.Item, agentID string) tea.Cmd {
 // toolDetailBody renders a tool-specific body at the given inner width, returning
 // ok=false for tools with no custom renderer (caller then uses genericToolBody).
 func (m model) toolDetailBody(it transcript.Item, width int) (string, bool) {
+	if meta, ok := toolRegistry[it.ToolName]; ok {
+		if meta.detail == nil {
+			return "", false
+		}
+		return meta.detail(m, it, width), true
+	}
 	switch it.ToolName {
 	case "Edit", "MultiEdit", "Write", "NotebookEdit":
 		return m.editToolDetail(it, width), true
